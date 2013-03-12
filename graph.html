@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<style>
+
+body, input, button {
+	font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.line {
+	fill: none;
+	stroke: #36c;
+	stroke-width: 1.5px;
+}
+
+.dot {
+	fill: #fff;
+	stroke: #000;
+	stroke-width: 1px;
+}
+
+.error-message {
+	background: #fa9;
+	padding: 0.8em;
+	border: 1px solid #c10;
+}
+
+</style>
+<body>
+<form>
+	<p><label>
+		Data file<br />
+		<input id="data-file" value="data/marketdata.csv" required="" />
+	</label></p>
+	<p><label>
+		Filtered data file<br />
+		<input id="filtered-data-file" value="data/marketdata-filtered.csv" required="" />
+	</label></p>
+	<p>
+		<button>Display</button>
+	</p>
+</form>
+<script src="graph/vendor/d3.min.js"></script>
+<script src="graph/vendor/q.min.js"></script>
+<script>
+
+draw_graph_from_form();
+
+d3.select('form').on('submit', function () {
+	d3.event.preventDefault();
+	draw_graph_from_form();
+});
+
+
+function draw_graph_from_form() {
+	var e_data_file = d3.select('#data-file'),
+		e_filtered_data_file = d3.select('#filtered-data-file');
+
+	var data_file = e_data_file[0][0].value;
+	var filtered_data_file = e_filtered_data_file[0][0].value;
+
+	if ( data_file && filtered_data_file ) {
+		d3.selectAll('form .error-message').remove();
+
+		draw_graph({
+			data_file: data_file,
+			filtered_data_file: filtered_data_file
+		}).fail(function (error) {
+			d3.select('form').append('p')
+				.classed('error-message', true)
+				.html('Could not draw graph, probably because failure to read the file.<br>' +
+					(/Chrome|Chromium/.test(navigator.userAgent) ? '<strong>Chrome restricts file access completely when not on a server.</strong><br>' : '') +
+					error);
+		});
+	}
+}
+
+function draw_graph(options) {
+
+	if (!draw_graph.uuid) {
+		draw_graph.uuid = (Math.random()+'').replace('.', '');
+	}
+
+	var margin = {top: 20, right: 20, bottom: 30, left: 50},
+			width = 960 - margin.left - margin.right,
+			height = 500 - margin.top - margin.bottom;
+
+	var x = d3.time.scale()
+			.range([0, width]);
+
+	var y = d3.scale.linear()
+			.range([height, 0]);
+
+	var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom");
+
+	var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient("left");
+
+	var line = d3.svg.line()
+			.x(function(d) { return x(d.date); })
+			.y(function(d) { return y(d.close); });
+
+	d3.select("svg#graph-"+draw_graph.uuid).remove();
+	var svg = d3.select("body").append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.attr("id", "graph-" + draw_graph.uuid)
+		.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	return Q.all([
+		Q.nfcall(d3.csv, options.data_file),
+		Q.nfcall(d3.csv, options.filtered_data_file)
+	]).spread(function (data, filtered_data) {
+		var parseDate = d3.time.format("%Y/%m/%d").parse;
+
+		function transform_datum(d) {
+			return {
+				date: parseDate(d.Date),
+				close: +d.Closing_price
+			};
+		}
+
+		// transform the data
+		data = data.map(transform_datum);
+		filtered_data = filtered_data.map(transform_datum);
+
+
+		// set the axis
+		x.domain(d3.extent(data, function(d) { return d.date; }));
+		y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+		svg.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + height + ")")
+				.call(xAxis);
+
+		svg.append("g")
+				.attr("class", "y axis")
+				.call(yAxis)
+			.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 6)
+				.attr("dy", ".71em")
+				.style("text-anchor", "end")
+				.text("Price");
+
+
+		// draw the graph
+		svg.append("path")
+				.datum(data)
+				.attr("class", "line")
+				.attr("d", line);
+
+
+		// filtered data
+
+		svg.selectAll(".dot")
+				.data(filtered_data)
+			.enter().append("circle")
+				.attr("class", "dot")
+				.attr("r", 2.5)
+				.attr("cx", function(d) { return x(d.date); })
+				.attr("cy", function(d) { return y(d.close); });
+
+	});
+
+}
+
+</script>
