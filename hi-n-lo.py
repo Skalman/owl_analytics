@@ -8,6 +8,8 @@ import sys
 import csv
 import argparse
 
+
+# argument parsing
 parser = argparse.ArgumentParser(description='find hi and lo values')
 parser.add_argument('-i, --input-file', metavar='<file>', type=str,
 	dest='input',
@@ -26,7 +28,7 @@ args = parser.parse_args()
 
 def main():
 	data = []
-	header = False
+	header = None
 
 	if args.input == None or args.input == '-':
 		input = sys.stdin
@@ -38,7 +40,7 @@ def main():
 	else:
 		output = open(args.output, 'w')
 
-	# read from stdin
+	# read from file
 	csvreader = csv.reader(input, delimiter=',', quotechar='|')
 
 	is_first = True
@@ -53,43 +55,75 @@ def main():
 	# calculate
 	hi_n_lo = get_hi_n_lo(data, compare_index = 1, sensitivity = args.sensitivity)
 
-	# write to stdout
+	# write to file
 	csvwriter = csv.writer(output, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 	csvwriter.writerow(header)
 	csvwriter.writerows(hi_n_lo)
 
 
 def get_hi_n_lo(arr, sensitivity = 0, compare_index = 0):
-	result = [ arr[0] ]
-	for i in range(1, len(arr)-1):
-		x, y, z = arr[i-1][compare_index], arr[i][compare_index], arr[i+1][compare_index]
+	if sensitivity == 0:
+		return get_all_hi_n_lo(arr, compare_index = compare_index)
+	else:
+		return filter_sensitive(arr, sensitivity = sensitivity, compare_index = compare_index)
 
-		if x < y < z or x > y > z or x == y == z:
+
+def get_all_hi_n_lo(arr, compare_index):
+	"""
+	Get all highs and lows. The resulting array is guaranteed to alternate
+	between highs and lows.
+	"""
+	last = arr[0]
+	result = [last]
+
+	for i in range(1, len(arr)-1):
+		# figure out whether to keep y
+		x = last[compare_index]
+		y = arr[i][compare_index]
+		z = arr[i+1][compare_index]
+		if x <= y <= z or x >= y >= z:
 			# nothing happens
 			pass
-		elif sensitivity != 0 and y == z:
-			# if sensitivity is non-zero, don't allow multiple same-value items
-			pass
 		else:
-			result.append(arr[i])
+			last = arr[i]
+			result.append(last)
 
-	result.append(arr[len(arr)-1])
-	if 0 < sensitivity:
-		filter_sensitive(result, sensitivity = sensitivity, compare_index = compare_index)
-
+	result.append(arr[-1])
 	return result
 
+def filter_sensitive(arr, sensitivity, compare_index):
+	"""
+	Given an array, this function returns an array that is guaranteed to
+	alternate between highs and lows. Additionally, variations smaller than
+	`sensitivity` are removed.
+	"""
+	result = get_all_hi_n_lo(arr, compare_index = compare_index)
 
-def filter_sensitive(result, sensitivity, compare_index):
-	i = len(result)-1
-	while i > 0:
-		x, y = result[i-1][compare_index], result[i][compare_index]
-		if abs(x - y) < sensitivity:
-			del result[i-1:i+1]
-			# we also deleted the previous
+	length = len(result)
+
+	i = length - 4
+	while i >= 0:
+		# Use four points a-b-c-d to figure out whether we can safely remove b and c
+		a = result[i][compare_index]
+		b = result[i + 1][compare_index]
+		c = result[i + 2][compare_index]
+		d = result[i + 3][compare_index]
+
+		remove = False
+		if abs(b - c) < sensitivity:
+			if b < c:
+				# b and d are low points
+				remove = a > c and b > d
+			else:
+				# a and c are low points
+				remove = a < c and b < d
+
+		if remove:
+			del result[i+1:i+3]
+			# TODO figure out whether we should really move two steps back
+			i -= 2
+		else:
 			i -= 1
-
-		i -= 1
 
 	return result
 
