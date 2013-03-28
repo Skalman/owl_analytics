@@ -83,7 +83,7 @@ function draw_graph_from_form() {
 			d3.select('form').append('p')
 				.classed('error-message', true)
 				.html('Could not draw graph, probably because failure to read the file.<br>' +
-					(/Chrome|Chromium/.test(navigator.userAgent) ? '<strong>Chrome restricts file access completely when not on a server.</strong><br>' : '') +
+					(location.protocol === 'file:' && /Chrome|Chromium/.test(navigator.userAgent) ? '<strong>Chrome restricts file access completely when not on a server.</strong><br>' : '') +
 					error);
 		});
 	}
