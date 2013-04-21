@@ -1,32 +1,31 @@
 #! /usr/bin/env python3
 
 # example usage (the two variants will do the exact same thing):
-# ./hi-n-lo.py -s 0.03 < data/marketdata.csv > data/marketdata-filtered.csv
-# ./hi-n-lo.py -s 0.03 -i data/marketdata.csv -o data/marketdata-filtered.csv
+# ./hi_n_lo.py -s 0.03 < data/marketdata.csv > data/marketdata-filtered.csv
+# ./hi_n_lo.py -s 0.03 -i data/marketdata.csv -o data/marketdata-filtered.csv
 
 import sys
 import csv
 import argparse
 
 
-# argument parsing
-parser = argparse.ArgumentParser(description='find hi and lo values')
-parser.add_argument('-i, --input-file', metavar='<file>', type=str,
-	dest='input',
-	help='input file (default: stdin)')
-
-parser.add_argument('-o, --output-file', metavar='<file>', type=str,
-	dest='output',
-	help='output file (default: stdout)')
-
-parser.add_argument('-s, --sensitivity', metavar='<num>', default=0, type=float,
-	dest='sensitivity',
-	help='sensitivity, a non-negative number (default: 0)')
-
-args = parser.parse_args()
-
-
 def main():
+	# argument parsing
+	parser = argparse.ArgumentParser(description='find hi and lo values')
+	parser.add_argument('-i, --input-file', metavar='<file>', type=str,
+		dest='input',
+		help='input file (default: stdin)')
+
+	parser.add_argument('-o, --output-file', metavar='<file>', type=str,
+		dest='output',
+		help='output file (default: stdout)')
+
+	parser.add_argument('-s, --sensitivity', metavar='<num>', default=0, type=float,
+		dest='sensitivity',
+		help='sensitivity, a non-negative number (default: 0)')
+
+	args = parser.parse_args()
+
 	data = []
 	header = None
 
@@ -129,4 +128,5 @@ def filter_sensitive(arr, sensitivity, compare_index):
 
 
 # execute the whole thing!
-main()
+if __name__ == '__main__':
+	main()
