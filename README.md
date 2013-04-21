@@ -4,6 +4,12 @@ Data filtering experiments
 The goal of this project is to filter data in different ways.
 
 
+System requirements
+-------------------
+
+* Python 2.7 or Python 3.2+
+
+
 License
 -------
 
