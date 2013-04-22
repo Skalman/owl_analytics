@@ -189,7 +189,3 @@ class TestHi_n_lo(unittest.TestCase):
 			(2, 6, 'expected'),
 			(3, 3, 'expected'),
 		])
-
-
-if __name__ == '__main__':
-	unittest.main(exit=False)
