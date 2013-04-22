@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 
 
 # Hi-n-lo - filter out the highs and the lows
