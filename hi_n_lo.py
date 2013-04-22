@@ -93,6 +93,10 @@ def get_all_hi_n_lo(arr, getter):
 	Get all highs and lows. The resulting array is guaranteed to alternate
 	between highs and lows.
 	"""
+	if len(arr) <= 1:
+		# return a copy of the list
+		return arr[:]
+
 	last = arr[0]
 	result = [last]
 
