@@ -52,7 +52,7 @@ def main():
 			data.append( (row[0], float(row[1])) )
 
 	# calculate
-	hi_n_lo = get_hi_n_lo(data, compare_index = 1, sensitivity = args.sensitivity)
+	hi_n_lo = get_hi_n_lo(data, getter = lambda x: x[1], sensitivity = args.sensitivity)
 
 	# write to file
 	csvwriter = csv.writer(output, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -60,14 +60,14 @@ def main():
 	csvwriter.writerows(hi_n_lo)
 
 
-def get_hi_n_lo(arr, sensitivity = 0, compare_index = 0):
+def get_hi_n_lo(arr, sensitivity = 0, getter = lambda x: x ):
 	if sensitivity == 0:
-		return get_all_hi_n_lo(arr, compare_index = compare_index)
+		return get_all_hi_n_lo(arr, getter = getter)
 	else:
-		return filter_sensitive(arr, sensitivity = sensitivity, compare_index = compare_index)
+		return filter_sensitive(arr, sensitivity = sensitivity, getter = getter)
 
 
-def get_all_hi_n_lo(arr, compare_index):
+def get_all_hi_n_lo(arr, getter):
 	"""
 	Get all highs and lows. The resulting array is guaranteed to alternate
 	between highs and lows.
@@ -77,9 +77,9 @@ def get_all_hi_n_lo(arr, compare_index):
 
 	for i in range(1, len(arr)-1):
 		# figure out whether to keep y
-		x = last[compare_index]
-		y = arr[i][compare_index]
-		z = arr[i+1][compare_index]
+		x = getter(last)
+		y = getter(arr[i])
+		z = getter(arr[i+1])
 		if x <= y <= z or x >= y >= z:
 			# nothing happens
 			pass
@@ -90,23 +90,23 @@ def get_all_hi_n_lo(arr, compare_index):
 	result.append(arr[-1])
 	return result
 
-def filter_sensitive(arr, sensitivity, compare_index):
+def filter_sensitive(arr, sensitivity, getter):
 	"""
 	Given an array, this function returns an array that is guaranteed to
 	alternate between highs and lows. Additionally, variations smaller than
 	`sensitivity` are removed.
 	"""
-	result = get_all_hi_n_lo(arr, compare_index = compare_index)
+	result = get_all_hi_n_lo(arr, getter = getter)
 
 	length = len(result)
 
 	i = length - 4
 	while i >= 0:
 		# Use four points a-b-c-d to figure out whether we can safely remove b and c
-		a = result[i][compare_index]
-		b = result[i + 1][compare_index]
-		c = result[i + 2][compare_index]
-		d = result[i + 3][compare_index]
+		a = getter(result[i])
+		b = getter(result[i + 1])
+		c = getter(result[i + 2])
+		d = getter(result[i + 3])
 
 		remove = False
 		if abs(b - c) < sensitivity:
