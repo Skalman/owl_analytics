@@ -2,71 +2,30 @@ import numpy
 import math
 import json
 
-def moving_average(p, n, type='simple'):
-	"""
-	compute an n period moving average.
+from chunker.sign_chunker import sign_chunker
 
-	type is 'simple' | 'exponential'
-	"""
-	p = numpy.asarray(p)
-	if type=='simple':
-		weights = numpy.ones(n)
-	else:
-		weights = numpy.exp(numpy.linspace(-1., 0., n))
-
-	weights /= weights.sum()
+from macd.lib import macd
 
 
-	a = numpy.convolve(p, weights, mode='full')[:len(p)]
-	a[:n] = a[n]
-	return a
-
-def moving_average_convergence(p, nslow=26, nfast=12):
-	"""
-	compute the MACD (Moving Average Convergence/Divergence) using a fast and slow exponential moving avg'
-	return value is emaslow, emafast, macd which are len(p) arrays
-	"""
-	emaslow = moving_average(p, nslow, type='exponential')
-	emafast = moving_average(p, nfast, type='exponential')
-	return emaslow, emafast, emafast - emaslow
-
-# TODO: move to sign_chunker
 def macd_chunk(data, nfast = 10, nslow = 35, nema = 5, return_all = False, getter = lambda x: x):
 	prices = numpy.array( map(getter, data) )
 
-	emaslow, emafast, macd = moving_average_convergence(prices, nslow=nslow, nfast=nfast)
-	ema9 = moving_average(macd, nema, type='exponential')
-
-	y1 = macd-ema9
-	y2 = ema9-macd
-
-	chunks = []
-
-	next_chunk_begin_index = nfast+1
-	cursign = -1 if y1[next_chunk_begin_index] < 0 else 1
+	calculated = macd(prices, nfast = nfast, nslow = nslow, nema = nema, return_all = True)
+	y1 = calculated['y1']
 
 	# Skip the first nfast values
-	for x in range(nfast+1, len(y1)):
-		this_sign = -1 if y1[x] < 0 else 1
 
-		if this_sign != cursign:
-			chunks.append({
-				'sign': cursign,
-				'data': data[next_chunk_begin_index:x],
-			})
-			next_chunk_begin_index = x
-			cursign = this_sign
+	# Note: could use a list view instead to save memory, but it might be less efficient
+	# See: http://stackoverflow.com/questions/3485475/can-i-create-a-view-on-a-python-list#3485490
+	cropped_y1 = y1[nfast+1:]
+	cropped_data = data[nfast+1:]
+	
+	chunks = sign_chunker(cropped_y1, cropped_data)
 
 	if return_all:
-		return {
-			'prices': prices,
-			'chunks': chunks,
-			'emaslow': emaslow,
-			'emafast': emafast,
-			'macd': macd,
-			'y1': y1,
-			'y2': y2,
-		}
+		calculated['prices'] = prices
+		calculated['chunks'] = chunks
+		return calculated
 	else:
 		return chunks
 

@@ -1,3 +1,8 @@
+Executing the program
+=====================
+
+* From the main `owl_analytics` folder, run `python -m macd` to show the current plot.
+
 Dependencies
 ============
 

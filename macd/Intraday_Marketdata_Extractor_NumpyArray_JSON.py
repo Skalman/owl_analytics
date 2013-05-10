@@ -8,12 +8,12 @@ import numpy as np
 from datetime import datetime
 import csv
 import json
-from macd_chunker import macd_chunk_json, macd_chunk
+from macd.macd_chunker import macd_chunk_json, macd_chunk
 
 urldata = {} 
 urldata['q'] = ticker = 'JPM'       # stock symbol
 urldata['x'] = 'NYSE'               # exchange symbol
-urldata['i'] = '150'                 # interval
+urldata['i'] = '60'                 # interval
 urldata['p'] = '1d'                 # number of past trading days (max has been 15d)
 urldata['f'] = 'd,o,h,l,c,v'        # requested data d is time, o is open, c is closing, h is high, l is low, v is volume
  
