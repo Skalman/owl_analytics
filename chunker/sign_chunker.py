@@ -1,63 +1,64 @@
 
+
 def sign(num, zero):
-	if num > 0:
-		return 1
-	elif num < 0:
-		return -1
-	else:
-		return zero
+    if num > 0:
+        return 1
+    elif num < 0:
+        return -1
+    else:
+        return zero
 
-def sign_chunker(data, return_data = None, include_last = False):
-	"""
-	Chunks a list by the sign.
 
-	>>> sign_chunker([1, 2, -3, -4, 5])
-	[{'data': [1, 2],   'sign':  1},
-	 {'data': [-3, -4], 'sign': -1}]
-	
-	>>> sign_chunker([0, 0, -1, 0, 2])
-	[{'data': [0, 0, -1, 0], 'sign': -1}]
-	
-	>>> sign_chunker([5, -5], include_last = True)
-	[{'data': [5],  'sign':  1},
-	 {'data': [-5], 'sign': -1}]
-	
-	>>> sign_chunker([], include_last = True)
-	[]
+def sign_chunker(data, return_data=None, include_last=False):
+    '''Chunks a list by the sign.
 
-	>>> sign_chunker([1, 2], include_last = True)
-	[{'data': [1, 2], 'sign': 1}]
+    >>> sign_chunker([1, 2, -3, -4, 5])
+    [{'data': [1, 2],   'sign':  1},
+     {'data': [-3, -4], 'sign': -1}]
 
-	"""
-	if return_data == None:
-		return_data = data
+    >>> sign_chunker([0, 0, -1, 0, 2])
+    [{'data': [0, 0, -1, 0], 'sign': -1}]
 
-	chunks = []
+    >>> sign_chunker([5, -5], include_last = True)
+    [{'data': [5],  'sign':  1},
+     {'data': [-5], 'sign': -1}]
 
-	begin_index = 0
-	cur_sign = 0
-	last_sign = 0
+    >>> sign_chunker([], include_last = True)
+    []
 
-	for x in range(len(data)):
-		cur_sign = sign(data[x], zero = last_sign)
+    >>> sign_chunker([1, 2], include_last = True)
+    [{'data': [1, 2], 'sign': 1}]
 
-		if cur_sign != last_sign:
-			if last_sign != 0:
-				chunks.append({
-					'sign': -cur_sign,
-					'data': return_data[begin_index:x],
-				})
-				begin_index = x
-			last_sign = cur_sign
+    '''
+    if return_data is None:
+        return_data = data
 
-	if include_last and len(data) > 0:
-		chunks.append({
-			'sign': cur_sign,
-			'data': return_data[begin_index:]
-		})
+    chunks = []
 
-	return chunks
+    begin_index = 0
+    cur_sign = 0
+    last_sign = 0
+
+    for x in range(len(data)):
+        cur_sign = sign(data[x], zero=last_sign)
+
+        if cur_sign != last_sign:
+            if last_sign != 0:
+                chunks.append({
+                    'sign': -cur_sign,
+                    'data': return_data[begin_index:x],
+                })
+                begin_index = x
+            last_sign = cur_sign
+
+    if include_last and len(data) > 0:
+        chunks.append({
+            'sign': cur_sign,
+            'data': return_data[begin_index:]
+        })
+
+    return chunks
 
 if __name__ == '__main__':
-	import doctest
-	doctest.testmod(optionflags = doctest.NORMALIZE_WHITESPACE)
+    import doctest
+    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
