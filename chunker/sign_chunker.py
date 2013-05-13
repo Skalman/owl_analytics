@@ -14,13 +14,20 @@ def sign_chunker(data, return_data = None, include_last = False):
 	>>> sign_chunker([1, 2, -3, -4, 5])
 	[{'data': [1, 2],   'sign':  1},
 	 {'data': [-3, -4], 'sign': -1}]
+	
 	>>> sign_chunker([0, 0, -1, 0, 2])
 	[{'data': [0, 0, -1, 0], 'sign': -1}]
+	
 	>>> sign_chunker([5, -5], include_last = True)
 	[{'data': [5],  'sign':  1},
 	 {'data': [-5], 'sign': -1}]
+	
 	>>> sign_chunker([], include_last = True)
 	[]
+
+	>>> sign_chunker([1, 2], include_last = True)
+	[{'data': [1, 2], 'sign': 1}]
+
 	"""
 	if return_data == None:
 		return_data = data
