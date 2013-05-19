@@ -15,18 +15,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import hi_n_lo
+import zigzag
 
 
-class TestHi_n_lo(unittest.TestCase):
+class TestZigzag(unittest.TestCase):
 
-    '''Test class for function get_hi_n_lo.
+    '''Test class for function get_zigzag.
     '''
 
-    def run_tuples(self, message, data, sensitivity=2, getter=lambda x: x[1]):
-        '''(TestHi_n_lo, list of tuple, string)
+    def run_absolute_sensitivity(self, message, data, absolute_sensitivity=2, getter=lambda x: x[1]):
+        '''(TestZigzag, string, list of tuple)
 
-        Takes a list of data points `data`, and calls `get_hi_n_lo()`. Asserts that
+        Takes a list of data points `data`, and calls `get_zigzag()`. Asserts that
         the resulting data points match those expected.
 
         * `data` - A list of data points. Each data point is a tuple, where the
@@ -34,7 +34,9 @@ class TestHi_n_lo(unittest.TestCase):
           If the tuple in question is expected in the output, the third item must be
           the string 'expected'.
         '''
-        actual = hi_n_lo.get_hi_n_lo(data, sensitivity, getter)
+        actual = zigzag.get_zigzag(data,
+                                   absolute_sensitivity=absolute_sensitivity,
+                                   getter=getter)
 
         # filter out the expected results
         expected = [item for item in data if item[-1] == 'expected']
@@ -42,10 +44,10 @@ class TestHi_n_lo(unittest.TestCase):
         self.assertEqual(expected, actual, message)
 
     def test_empty(self):
-        self.run_tuples('Empty dataset', [])
+        self.run_absolute_sensitivity('Empty dataset', [])
 
     def test_rand0(self):
-        self.run_tuples('Dataset "Rand0"', [
+        self.run_absolute_sensitivity('Dataset "Rand0"', [
             (1,  3, 'expected'),
             (2,  2),
             (3,  1, 'expected'),
@@ -60,7 +62,7 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_rand1(self):
-        self.run_tuples('Dataset "Rand1"', [
+        self.run_absolute_sensitivity('Dataset "Rand1"', [
             (1, 4, 'expected'),
             (2, 3, 'expected'),
             (3, 4),
@@ -70,7 +72,7 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_rand2(self):
-        self.run_tuples('Dataset "Rand2"', [
+        self.run_absolute_sensitivity('Dataset "Rand2"', [
             (1, 9, 'expected'),
             (2, 7),
             (3, 6),
@@ -83,12 +85,12 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_r0_f0(self):
-        self.run_tuples('Dataset "R0 / F0"', [
+        self.run_absolute_sensitivity('Dataset "R0 / F0"', [
             (1, 3, 'expected'),
         ])
 
     def test_r1(self):
-        self.run_tuples('Dataset "R1"', [
+        self.run_absolute_sensitivity('Dataset "R1"', [
             (1, 1, 'expected'),
             (2, 2),
             (3, 3),
@@ -98,54 +100,54 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_r2(self):
-        self.run_tuples('Dataset "R2"', [
+        self.run_absolute_sensitivity('Dataset "R2"', [
             (1, 2, 'expected'),
             (2, 3, 'expected'),
         ])
 
     def test_r3(self):
-        self.run_tuples('Dataset "R3"', [
+        self.run_absolute_sensitivity('Dataset "R3"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 4, 'expected'),
         ])
 
     def test_r4(self):
-        self.run_tuples('Dataset "R4"', [
+        self.run_absolute_sensitivity('Dataset "R4"', [
             (1, 6, 'expected'),
             (2, 3, 'expected'),
             (3, 6, 'expected'),
         ])
 
     def test_r5(self):
-        self.run_tuples('Dataset "R5"', [
+        self.run_absolute_sensitivity('Dataset "R5"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 5, 'expected'),
         ])
 
     def test_r6(self):
-        self.run_tuples('Dataset "R6"', [
+        self.run_absolute_sensitivity('Dataset "R6"', [
             (1, 3, 'expected'),
             (2, 2, 'expected'),
             (3, 6, 'expected'),
         ])
 
     def test_f1(self):
-        self.run_tuples('Dataset "F1"', [
+        self.run_absolute_sensitivity('Dataset "F1"', [
             (1, 3, 'expected'),
             (2, 2, 'expected'),
         ])
 
     def test_f2(self):
-        self.run_tuples('Dataset "F2"', [
+        self.run_absolute_sensitivity('Dataset "F2"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 2, 'expected'),
         ])
 
     def test_f3(self):
-        self.run_tuples('Dataset "F3"', [
+        self.run_absolute_sensitivity('Dataset "F3"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 4),
@@ -153,7 +155,7 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_f4(self):
-        self.run_tuples('Dataset "F4"', [
+        self.run_absolute_sensitivity('Dataset "F4"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 4),
@@ -163,7 +165,7 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_f5(self):
-        self.run_tuples('Dataset "F5"', [
+        self.run_absolute_sensitivity('Dataset "F5"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 2),
@@ -171,7 +173,7 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_f6(self):
-        self.run_tuples('Dataset "F6"', [
+        self.run_absolute_sensitivity('Dataset "F6"', [
             (1, 6, 'expected'),
             (2, 5),
             (3, 4),
@@ -181,8 +183,78 @@ class TestHi_n_lo(unittest.TestCase):
         ])
 
     def test_f7(self):
-        self.run_tuples('Dataset "F7"', [
+        self.run_absolute_sensitivity('Dataset "F7"', [
             (1, 3, 'expected'),
             (2, 6, 'expected'),
             (3, 3, 'expected'),
         ])
+
+    def run_relative_sensitivity(self, message, data, relative_sensitivity=2.5,
+                                 getter=lambda x: x[1]):
+        '''(TestZigzag, string, list of tuple)
+
+        Takes a list of relative changes to data points `data_changes`, performs
+        the transformations and calls `get_zigzag()`. Asserts that the resulting
+        data points match those expected.
+
+        * `data` - A list of data points. Each data point is a tuple, where the
+          second item is the number which will be considered in the filtering.
+          If the tuple in question is expected in the output, the third item
+          must be the string 'expected'.
+        '''
+        actual = zigzag.get_zigzag(data,
+                                   relative_sensitivity=relative_sensitivity,
+                                   getter=getter)
+
+        # filter out the expected results
+        expected = [item for item in data if item[-1] == 'expected']
+
+        self.assertEqual(expected, actual, message)
+
+    def test_relative_rise(self):
+        self.run_relative_sensitivity(
+            'Relative rise', relative_sensitivity=2.5,
+            data=[
+                (1, 2, 'expected'),
+                (2, 4),
+                (3, 2),
+                (4, 5, 'expected'),
+            ])
+
+    def test_relative_decline(self):
+        self.run_relative_sensitivity(
+            'Relative decline', relative_sensitivity=2.5,
+            data=[
+                (1, 10, 'expected'),
+                (2, 4),
+                (3, 8),
+                (4, 4, 'expected'),
+            ])
+
+    def test_relative(self):
+        self.run_relative_sensitivity(
+            'Relative', relative_sensitivity=2,
+            data=[
+                (1,  3, 'expected'),
+                (2,  4),
+                (3,  6),
+                (4,  4),
+                (5,  8, 'expected'),
+                (6,  4, 'expected'),
+                (7,  8, 'expected'),
+                (8,  4, 'expected'),
+                (9,  9, 'expected'),
+                (10, 5),
+                (11, 6),
+                (12, 3, 'expected'),
+                (13, 5),
+                (14, 4),
+                (15, 7, 'expected'),
+                (16, 1, 'expected'),
+                (17, 2, 'expected'),
+                (18, 1.5, 'expected'),
+            ])
+
+
+if __name__ == '__main__':
+    unittest.main(exit=False)

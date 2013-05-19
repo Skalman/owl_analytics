@@ -21,8 +21,8 @@
 # Example usage
 # -------------
 # The two variants will do the exact same thing:
-# ./hi_n_lo.py -s 0.03 < data/marketdata.csv > data/marketdata-filtered.csv
-# ./hi_n_lo.py -s 0.03 -i data/marketdata.csv -o data/marketdata-filtered.csv
+# ./zigzag.py -s 0.03 < data/marketdata.csv > data/marketdata-filtered.csv
+# ./zigzag.py -s 0.03 -i data/marketdata.csv -o data/marketdata-filtered.csv
 
 
 import sys
@@ -74,24 +74,27 @@ def main():
             data.append((row[0], float(row[1])))
 
     # calculate
-    hi_n_lo = get_hi_n_lo(data, getter=lambda x: x[
-                          1], sensitivity=args.sensitivity)
+    zigzag = get_zigzag(data, getter=lambda x: x[1],
+                        sensitivity=args.sensitivity)
 
     # write to file
     csvwriter = csv.writer(
         output, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     csvwriter.writerow(header)
-    csvwriter.writerows(hi_n_lo)
+    csvwriter.writerows(zigzag)
 
 
-def get_hi_n_lo(arr, sensitivity=0, getter=lambda x: x):
-    if sensitivity == 0:
-        return get_all_hi_n_lo(arr, getter=getter)
+def get_zigzag(arr, absolute_sensitivity=0, relative_sensitivity=0, getter=lambda x: x):
+    if absolute_sensitivity == 0 and relative_sensitivity == 0:
+        return get_all_zigzag(arr, getter=getter)
     else:
-        return filter_sensitive(arr, sensitivity=sensitivity, getter=getter)
+        return filter_sensitive(arr,
+                                absolute_sensitivity=absolute_sensitivity,
+                                relative_sensitivity=relative_sensitivity,
+                                getter=getter)
 
 
-def get_all_hi_n_lo(arr, getter):
+def get_all_zigzag(arr, getter):
     '''Get all highs and lows
 
     Get all highs and lows. The resulting array is guaranteed to alternate
@@ -120,16 +123,37 @@ def get_all_hi_n_lo(arr, getter):
     return result
 
 
-def filter_sensitive(arr, sensitivity, getter):
+def filter_sensitive(arr,
+                     absolute_sensitivity=None,
+                     relative_sensitivity=None,
+                     getter=lambda x: x):
     '''Return highs and lows, filtered by sensitivity.
 
     Given an array, this function returns an array that is guaranteed to
     alternate between highs and lows. Additionally, variations smaller than
     `sensitivity` are removed.
     '''
-    result = get_all_hi_n_lo(arr, getter=getter)
+    result = get_all_zigzag(arr, getter=getter)
 
     length = len(result)
+
+    def absolute_meets_threshold(b, c):
+        return abs(c - b) >= absolute_sensitivity
+
+    def relative_meets_threshold(b, c):
+        assert relative_sensitivity >= 1
+
+        if b < c:
+            diff = c / float(b)
+        else:
+            diff = b / float(c)
+
+        return diff >= relative_sensitivity
+
+    if absolute_sensitivity:
+        meets_threshold = absolute_meets_threshold
+    else:
+        meets_threshold = relative_meets_threshold
 
     i = length - 4
     while i >= 0:
@@ -140,18 +164,17 @@ def filter_sensitive(arr, sensitivity, getter):
         c = getter(result[i + 2])
         d = getter(result[i + 3])
 
-        remove = False
-        if abs(b - c) < sensitivity:
-            if b < c:
-                # b and d are low points
-                remove = a > c and b > d
-            else:
-                # a and c are low points
-                remove = a < c and b < d
+        # Check whether b and c are middle points
+        if b < c:
+            # is a the highest and d the lowest?
+            middle_points = a >= c and b >= d
+        else:
+            # is a the lowest and d the highest?
+            middle_points = a <= c and b <= d
 
-        if remove:
+        if middle_points and not meets_threshold(b, c):
+            # remove
             del result[i + 1:i + 3]
-            # TODO figure out whether we should really move two steps back
             i -= 2
         else:
             i -= 1
