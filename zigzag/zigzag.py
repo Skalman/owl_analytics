@@ -1,6 +1,3 @@
-#! /usr/bin/env python
-
-
 # Hi-n-lo - filter out the highs and the lows
 # Copyright (C) 2013  Dan Wolff
 #
@@ -18,142 +15,64 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# Example usage
-# -------------
-# The two variants will do the exact same thing:
-# ./zigzag.py -s 0.03 < data/marketdata.csv > data/marketdata-filtered.csv
-# ./zigzag.py -s 0.03 -i data/marketdata.csv -o data/marketdata-filtered.csv
-
-
-import sys
-import csv
-import argparse
-
-
-def main():
-    # argument parsing
-    parser = argparse.ArgumentParser(description='find hi and lo values')
-    parser.add_argument('-i, --input-file', metavar='<file>', type=str,
-                        dest='input',
-                        help='input file (default: stdin)')
-
-    parser.add_argument('-o, --output-file', metavar='<file>', type=str,
-                        dest='output',
-                        help='output file (default: stdout)')
-
-    parser.add_argument(
-        '-s, --sensitivity', metavar='<num>', default=0, type=float,
-        dest='sensitivity',
-        help='sensitivity, a non-negative number (default: 0)')
-
-    args = parser.parse_args()
-
-    data = []
-    header = None
-
-    if args.input == None or args.input == '-':
-        input = sys.stdin
-    else:
-        input = open(args.input, 'r')
-
-    if args.output == None or args.output == '-':
-        output = sys.stdout
-    else:
-        output = open(args.output, 'w')
-
-    # read from file
-    csvreader = csv.reader(input, delimiter=',', quotechar='|')
-
-    is_first = True
-    for row in csvreader:
-        if is_first:
-            # the first row contains the header
-            header = row
-            is_first = False
-        else:
-            data.append((row[0], float(row[1])))
-
-    # calculate
-    zigzag = get_zigzag(data, getter=lambda x: x[1],
-                        sensitivity=args.sensitivity)
-
-    # write to file
-    csvwriter = csv.writer(
-        output, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    csvwriter.writerow(header)
-    csvwriter.writerows(zigzag)
-
-
-def get_zigzag(arr, absolute_sensitivity=0, relative_sensitivity=0, getter=lambda x: x):
-    if absolute_sensitivity == 0 and relative_sensitivity == 0:
-        return get_all_zigzag(arr, getter=getter)
-    else:
-        return filter_sensitive(arr,
-                                absolute_sensitivity=absolute_sensitivity,
-                                relative_sensitivity=relative_sensitivity,
-                                getter=getter)
-
-
-def get_all_zigzag(arr, getter):
+def all(data, getter=lambda x: x):
     '''Get all highs and lows
 
     Get all highs and lows. The resulting array is guaranteed to alternate
     between highs and lows.
     '''
-    if len(arr) <= 1:
+    if len(data) <= 1:
         # return a copy of the list
-        return arr[:]
+        return data[:]
 
-    last = arr[0]
+    last = data[0]
     result = [last]
 
-    for i in range(1, len(arr) - 1):
+    for i in range(1, len(data) - 1):
         # figure out whether to keep y
         x = getter(last)
-        y = getter(arr[i])
-        z = getter(arr[i + 1])
+        y = getter(data[i])
+        z = getter(data[i + 1])
         if x <= y <= z or x >= y >= z:
             # nothing happens
             pass
         else:
-            last = arr[i]
+            last = data[i]
             result.append(last)
 
-    result.append(arr[-1])
+    result.append(data[-1])
     return result
 
 
-def filter_sensitive(arr,
-                     absolute_sensitivity=None,
-                     relative_sensitivity=None,
-                     getter=lambda x: x):
-    '''Return highs and lows, filtered by sensitivity.
+def min_change(data, change=10, type='percent', getter=lambda x: x):
+    '''(list, change=<num>, type='percent' | 'absolute', getter=lambda) -> list
+    Return highs and lows, filtered by sensitivity.
 
     Given an array, this function returns an array that is guaranteed to
     alternate between highs and lows. Additionally, variations smaller than
     `sensitivity` are removed.
     '''
-    result = get_all_zigzag(arr, getter=getter)
+    result = all(data, getter=getter)
 
     length = len(result)
 
-    def absolute_meets_threshold(b, c):
-        return abs(c - b) >= absolute_sensitivity
+    def get_absolute_change(b, c):
+        return abs(c - b)
 
-    def relative_meets_threshold(b, c):
-        assert relative_sensitivity >= 1
-
+    def get_relative_change(b, c):
         if b < c:
-            diff = c / float(b)
+            return 100 * (1 - float(b) / c)
         else:
-            diff = b / float(c)
+            return 100 * (1 - float(c) / b)
 
-        return diff >= relative_sensitivity
-
-    if absolute_sensitivity:
-        meets_threshold = absolute_meets_threshold
+    if type == 'percent':
+        assert 0 <= change <= 100
+        get_change = get_relative_change
+    elif type == 'absolute':
+        assert 0 <= change
+        get_change = get_absolute_change
     else:
-        meets_threshold = relative_meets_threshold
+        assert type == 'percent' or type == 'absolute'
 
     i = length - 4
     while i >= 0:
@@ -172,7 +91,7 @@ def filter_sensitive(arr,
             # is a the lowest and d the highest?
             middle_points = a <= c and b <= d
 
-        if middle_points and not meets_threshold(b, c):
+        if middle_points and get_change(b, c) < change:
             # remove
             del result[i + 1:i + 3]
             i -= 2
@@ -180,8 +99,3 @@ def filter_sensitive(arr,
             i -= 1
 
     return result
-
-
-# execute the whole thing!
-if __name__ == '__main__':
-    main()
