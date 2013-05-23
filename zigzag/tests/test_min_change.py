@@ -18,7 +18,7 @@ import unittest
 import zigzag
 
 
-class TestZigzag(unittest.TestCase):
+class TestMinChange(unittest.TestCase):
 
     '''Test class for function min_change.
     '''
