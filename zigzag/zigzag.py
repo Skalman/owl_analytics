@@ -135,6 +135,9 @@ def max_points(data, points=2, type='percent', getter=lambda x: x, return_min_ch
         else:
             return 1 - float(c) / b
 
+    def get_absolute_change(b, c):
+        return abs(c - b)
+
     def index_of_smallest_except_edge(iter):
         '''
         Find the smallest value in a list, but the first and the last item are
@@ -149,17 +152,24 @@ def max_points(data, points=2, type='percent', getter=lambda x: x, return_min_ch
                 index = x
         return index
 
+    if type == 'percent':
+        get_change = get_relative_change
+    elif type == 'absolute':
+        get_change = get_absolute_change
+    else:
+        assert type == 'percent' or type == 'absolute'
+
     # Calculate the changes between all the points
     changes = []
     for x in range(0, len(zz) - 1):
-        changes.append(get_relative_change(getter(zz[x]), getter(zz[x + 1])))
+        changes.append(get_change(getter(zz[x]), getter(zz[x + 1])))
 
-    while points + 2 <= len(zz):
+    while points + 2 < len(zz):
         # Find the smallest change
         s = index_of_smallest_except_edge(changes)
 
         # Calculate the new change for the surrounding points
-        new_change = get_relative_change(getter(zz[s - 1]), getter(zz[s + 2]))
+        new_change = get_change(getter(zz[s - 1]), getter(zz[s + 2]))
 
         # Remove the two points which created the smallest change (s and s+1)
         del zz[s:s + 2]
