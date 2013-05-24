@@ -33,6 +33,20 @@ class TestMaxPoints(unittest.TestCase):
 
         self.assertEqual(expected, actual, message)
 
+    def test_flat(self):
+        '''
+        An empty list is expected.
+        '''
+        self.run_test(
+            'Flat', points=2,
+            data=[
+                (1, 1),
+                (2, 1),
+                (3, 1),
+                (4, 1),
+            ]
+        )
+
     def test_odd(self):
         self.run_test(
             'Minimal odd case', points=2,
