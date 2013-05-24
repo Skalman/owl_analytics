@@ -104,13 +104,13 @@ def min_change(data, change=10, type='percent', getter=lambda x: x):
 def max_points(data, points=2, type='percent', getter=lambda x: x, return_min_change=False):
     '''
     1. Find all high and low points
-    2. Calculate diffs between the points
+    2. Calculate changes between the points
     3. Loop:
         a. If the number of points (remaining) is less than or equal to the desired amount of points, break out of the loop
-        b. Find the smallest diff
-        c. Remove the points which create that diff
-        d. Recalculate the diff around the removed points
-    4. The smallest remaining diff is now the minimum change
+        b. Find the smallest change
+        c. Remove the points which create that change
+        d. Recalculate the change around the removed points
+    4. The smallest remaining change is now the minimum change
 
 
     Potential optimizations to look into, in order to go from
@@ -118,7 +118,7 @@ def max_points(data, points=2, type='percent', getter=lambda x: x, return_min_ch
 
     * Use a linked list to enable quick deletions from the list
     * Consider whether it could be possible to remove multiple points in one go.
-      It might be possible to remove the smallest half of the diffs in one go.
+      It might be possible to remove the smallest half of the changes in one go.
       Currently, only two points are removed.
     '''
 
@@ -136,29 +136,36 @@ def max_points(data, points=2, type='percent', getter=lambda x: x, return_min_ch
             return 1 - float(c) / b
 
     def index_of_smallest_except_edge(iter):
+        '''
+        Find the smallest value in a list, but the first and the last item are
+        ignored. Return the index of the value in question.
+
+        >>> index_of_smallest_except_edge([1, 6, 8, 2, 6, 3, 8])
+        3
+        '''
         index = 1
         for x in range(2, len(iter) - 1):
             if iter[x] < iter[index]:
                 index = x
         return index
 
-    # Calculate the diffs between all the points
-    diffs = []
+    # Calculate the changes between all the points
+    changes = []
     for x in range(0, len(zz) - 1):
-        diffs.append(get_relative_change(getter(zz[x]), getter(zz[x + 1])))
+        changes.append(get_relative_change(getter(zz[x]), getter(zz[x + 1])))
 
     while points + 2 <= len(zz):
-        # Find the smallest diff
-        s = index_of_smallest_except_edge(diffs)
+        # Find the smallest change
+        s = index_of_smallest_except_edge(changes)
 
-        # Calculate the new diff for the surrounding points
-        new_diff = get_relative_change(getter(zz[s - 1]), getter(zz[s + 2]))
+        # Calculate the new change for the surrounding points
+        new_change = get_relative_change(getter(zz[s - 1]), getter(zz[s + 2]))
 
-        # Remove the two points which created the smallest diff (s and s+1)
+        # Remove the two points which created the smallest change (s and s+1)
         del zz[s:s + 2]
 
-        # Replace three diffs with one recalculated (s-1, s and s+1)
-        diffs[s - 1:s + 2] = [new_diff]
+        # Replace three changes with one recalculated (s-1, s and s+1)
+        changes[s - 1:s + 2] = [new_change]
 
     # Remove the edge values
     zz = zz[1:-1]
@@ -166,7 +173,7 @@ def max_points(data, points=2, type='percent', getter=lambda x: x, return_min_ch
     if return_min_change:
         return {
             'data': zz,
-            'min_change': diffs[index_of_smallest_except_edge(diffs)],
+            'min_change': changes[index_of_smallest_except_edge(changes)],
         }
     else:
         return zz
