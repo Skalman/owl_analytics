@@ -17,10 +17,10 @@ def _pullQuote(url, urlconditions):
 class IntradayMinutes(object):
     '''Extract intraday market data from Google finance.
 
-    URL to access market data from Google finance:
+    URL to access market data:
     http://www.google.com/finance/getprices?q=IBM&x=NYSE&i=60&p=5d&f=d,c,h,l,o,v
 
-    Description of abbreviations present in the above URL:
+    Abbreviations in the URL:
     q = quote symbol
     x = exchange symbol
     i = interval in seconds i.e. 60 = 1 minute
