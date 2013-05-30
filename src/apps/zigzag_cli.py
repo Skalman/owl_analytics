@@ -1,17 +1,15 @@
-#! /usr/bin/env python
-
-# Example usage
-# -------------
-# The two variants will do the exact same thing:
-# ./zigzag_cli.py -s 0.03 < data/marketdata.csv > data/marketdata-filtered.csv
-# ./zigzag_cli.py -s 0.03 -i data/marketdata.csv -o data/marketdata-filtered.csv
-
+'''
+Example usage
+-------------
+The two variants will do the exact same thing:
+python -m apps.zigzag_cli -c 3 < ../datastore/csv/marketdata.csv > ../datastore/csv/marketdata-filtered.csv
+python -m apps.zigzag_cli -c 3 -i ../datastore/csv/marketdata.csv -o ../datastore/csv/marketdata-filtered.csv
+'''
 
 import sys
 import csv
 import argparse
-import zigzag
-
+from techmodels.overlays.trend.price.zigzag import min_change
 
 def main():
     # argument parsing
@@ -64,8 +62,7 @@ def main():
             data.append((row[0], float(row[1])))
 
     # calculate
-    filtered = zigzag.min_change(data, getter=lambda x: x[1],
-                                 change=args.change)
+    filtered = min_change(data, getter=lambda x: x[1], change=args.change)
 
     # write to file
     csvwriter = csv.writer(
