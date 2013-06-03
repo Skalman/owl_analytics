@@ -1,36 +1,46 @@
 '''
 Price Trend Indicator: Moving Average Convergence/Divergence (MACD)
 '''
-from ma import moving_average
+from ma import MAIndicator
 
 
-def moving_average_convergence(p, nfast=10, nslow=35):
-    '''compute the MACD (Moving Average Convergence/Divergence) using a fast
-    and slow exponential moving avgerages.
-    return value is emaslow, emafast, macd which are len(p) arrays
+class MACDIndicator(object):
     '''
-    emaslow = moving_average(p, nslow, t='exponential')
-    emafast = moving_average(p, nfast, t='exponential')
-    return emaslow, emafast, emafast - emaslow
+    Moving Average Convergence/Divergence (MACD)
+    MACD: (10-period-EMA - 35-period-EMA)
+    Signal: 5-period-EMA of MACD
+    Indicator: (MACD - Signal)
+    '''
 
+    def __init__(self, data, nfast=10, nslow=35, nema=5):
+        '''
+        Constructor
+        data = close prices
+        nfast = number of periods for shorter moving average(exponential)
+        nslow = number of periods for longer moving average(exponential)
+        nema = number of periods for just an exponential moving average
+        '''
+        self.data = data
+        self.nfast = nfast
+        self.nslow = nslow
+        self.nema = nema
+        self.matype = 'exponential'
+        self.macd = self.__calculate_macd()
 
-def macd(data, nfast=10, nslow=35, nema=5, return_all=False):
-    emaslow, emafast, macd = moving_average_convergence(data,
-                                                        nslow=nslow,
-                                                        nfast=nfast)
-    ema9 = moving_average(macd, nema, t='exponential')
+    def __calculate_macd(self):
+        return self.emafast() - self.emaslow()
 
-    y1 = macd - ema9
-    y2 = ema9 - macd
+    def emaslow(self):
+        return MAIndicator(self.data, self.nslow, self.matype).ma
 
-    if return_all:
-        return {
-            'macd': macd,
-            'emaslow': emaslow,
-            'emafast': emafast,
-            'ema9': ema9,
-            'y1': y1,
-            'y2': y2,
-        }
-    else:
-        return y1
+    def emafast(self):
+        return MAIndicator(self.data, self.nfast, self.matype).ma
+
+    def signal(self):
+        return MAIndicator(self.macd, self.nema, self.matype).ma
+
+    def indicator(self):
+        return self.macd - self.signal()
+
+    def indicator_inverse(self):
+        return self.signal() - self.macd

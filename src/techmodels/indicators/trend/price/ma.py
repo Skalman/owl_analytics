@@ -4,20 +4,34 @@ Price Trend Indicator: Moving Average (MA)
 import numpy
 
 
-def moving_average(p, n, t='simple'):
-    """
-    compute an n period moving average.
+class MAIndicator(object):
+    '''
+    Moving Average(MA)
+    SMA: (summation of all N-period-prices / N)
+    EMA: exponential of all N-period-prices
+    Indicator: -None-
+    '''
 
-    t(type) is 'simple' | 'exponential'
-    """
-    p = numpy.asarray(p)
-    if t == 'simple':
-        weights = numpy.ones(n)
-    else:
-        weights = numpy.exp(numpy.linspace(-1., 0., n))
+    def __init__(self, data, n, t='simple'):
+        '''
+        Constructor
+        data = close prices
+        n = number of periods
+        t(type) = 'simple' | 'exponential'
+        '''
+        self.data = data
+        self.n = n
+        self.t = t
+        self.ma = self.__calculate_ma()
 
-    weights /= weights.sum()
+    def __calculate_ma(self):
+        self.data = numpy.asarray(self.data)
+        if self.t == 'simple':
+            weights = numpy.ones(self.n)
+        else:
+            weights = numpy.exp(numpy.linspace(-1., 0., self.n))
 
-    a = numpy.convolve(p, weights, mode='full')[:len(p)]
-    a[:n] = a[n]
-    return a
+        weights /= weights.sum()
+        a = numpy.convolve(self.data, weights, mode='full')[:len(self.data)]
+        a[:self.n] = a[self.n]
+        return a
