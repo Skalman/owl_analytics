@@ -70,7 +70,7 @@ ax1t.set_yticks([])
 
 #####
 #
-# MACD indicator
+# MACD indicator axis
 #
 #####
 from techmodels.indicators.trend.price.macd import MACDIndicator
@@ -89,7 +89,7 @@ ax2.text(0.025, 0.95, 'MACD (%d, %d, %d)' % (nfast, nslow, nema), va='top', tran
 
 #####
 #
-# DPO indicator
+# DPO indicator axis
 #
 #####
 from techmodels.indicators.trend.price.dpo import DPOIndicator
@@ -107,40 +107,63 @@ ax3.text(0.025, 0.95, 'DPO (%d)' % (n), va='top', transform=ax3.transAxes, fonts
 
 #####
 #
-# Shading Region
+# Shading-Region overlay
 #
 #####
 from visualization.matplotlib.utils.transform.regionshadingoverlay.regiontoshade import TranformRegionToShade
+
+legend = ''
+def shaderegion(chunkdata,
+                color_p='green', color_n='red', color_alpha=0.1,
+                legend=''):
+    ymin, ymax = ax1.get_ylim()
+    collection = collections.BrokenBarHCollection.span_where(
+                    mdates.date2num(chunkdata.positiveTimestamps()),
+                    ymin,
+                    ymax,
+                    where=chunkdata.positiveFlag(),
+                    facecolor=color_p,
+                    alpha=color_alpha)
+    ax1.add_collection(collection)
+
+    collection = collections.BrokenBarHCollection.span_where(
+                    mdates.date2num(chunkdata.negativeTimestamps()),
+                    ymin,
+                    ymax,
+                    where=chunkdata.negativeFlag(),
+                    facecolor=color_n,
+                    alpha=color_alpha)
+    ax1.add_collection(collection)
+
+    ax1.text(0.025, 0.95, legend, va='top',
+             transform=ax1.transAxes, fontsize=textsize)
+
+###
+# MACD_CHUNK shading overlay
+###
 from sequences.io.trend.price.macd.s_chunk import macd_chunk
 
 nfast, nslow, nema = 10, 35, 5
-label = 'CHUNK-MACD'
-chunkdata = TranformRegionToShade(macd_chunk(
+legend += '%s (%d, %d, %d)\n' % ('CHUNK-MACD', nfast, nslow, nema)
+macd_chunkdata = TranformRegionToShade(macd_chunk(
                                             json.loads(intradaydata_json),
                                             nfast, nslow, nema,
                                             getter=lambda x: x[u'close']))
+shaderegion(chunkdata=macd_chunkdata, legend=legend)
 
-ymin, ymax = ax1.get_ylim()
-collection = collections.BrokenBarHCollection.span_where(
-                mdates.date2num(chunkdata.positiveTimestamps()),
-                ymin,
-                ymax,
-                where=chunkdata.positiveFlag(),
-                facecolor='green',
-                alpha=0.1)
-ax1.add_collection(collection)
-
-collection = collections.BrokenBarHCollection.span_where(
-                mdates.date2num(chunkdata.negativeTimestamps()),
-                ymin,
-                ymax,
-                where=chunkdata.negativeFlag(),
-                facecolor='red',
-                alpha=0.1)
-ax1.add_collection(collection)
-
-ax1.text(0.025, 0.95, '%s (%d, %d, %d)' % (label, nfast, nslow, nema),
-         va='top', transform=ax1.transAxes, fontsize=textsize)
+###
+# DPO_CHUNK shading overlay
+###
+from sequences.io.trend.price.dpo.s_chunk import dpo_chunk
+n = 10
+legend += '%s (%d)\n' % ('CHUNK-DPO', n)
+dpo_chunkdata = TranformRegionToShade(dpo_chunk(
+                                            json.loads(intradaydata_json),
+                                            n,
+                                            getter=lambda x: x[u'close']))
+shaderegion(chunkdata=dpo_chunkdata,
+            color_p='gray', color_n='black', color_alpha=0.4,
+            legend=legend)
 
 #####
 #
