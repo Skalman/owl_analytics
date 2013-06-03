@@ -20,7 +20,7 @@ def macd_chunk(data, nfast=10, nslow=35, nema=5, getter=lambda x: x):
     return chunks
 
 
-def macd_chunk_json(input):
-    python_list = json.loads(input)
-    chunks = macd_chunk(python_list, getter=lambda x: x[u'close'])
+def macd_chunk_json(data, pricetype=u'close'):
+    python_list = json.loads(data)
+    chunks = macd_chunk(python_list, getter=lambda x: x[pricetype])
     return json.dumps(chunks)
