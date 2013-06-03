@@ -194,6 +194,16 @@ ax2.yaxis.set_major_locator(MyLocator(5, prune='both'))
 
 #####
 #
+# Multiple-axes cursor (crosshair)
+#
+#####
+from matplotlib.widgets import MultiCursor
+# Note! set useblit = True on gtkagg for enhanced performance
+multi = MultiCursor(fig.canvas, (ax1, ax2, ax3), color='r',
+                    useblit=True, alpha=0.5, linewidth=1)
+
+#####
+#
 # Display plot
 #
 #####
