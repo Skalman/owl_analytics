@@ -91,7 +91,7 @@ ax2.text(0.025, 0.95, 'MACD (%d, %d, %d)' % (nfast, nslow, nema), va='top', tran
 #
 #####
 from visualization.matplotlib.utils.transform.regionshadingoverlay.regiontoshade import TranformRegionToShade
-from sequences.io.trend.price.macd.chunk import macd_chunk
+from sequences.io.trend.price.macd.s_chunk import macd_chunk
 
 nfast, nslow, nema = 10, 35, 5
 label = 'CHUNK-MACD'
