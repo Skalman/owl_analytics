@@ -25,6 +25,7 @@ textsize = 9
 left, width = 0.1, 0.8
 rect1 = [left, 0.5, width, 0.4]  # left, bottom, width, height
 rect2 = [left, 0.3, width, 0.2]
+rect3 = [left, 0.1, width, 0.2]
 
 #####
 #
@@ -37,6 +38,7 @@ axescolor = '#f6f6f6'  # axises background color
 ax1 = fig.add_axes(rect1, axisbg=axescolor)
 ax1t = ax1.twinx()
 ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
+ax3 = fig.add_axes(rect3, axisbg=axescolor, sharex=ax1)
 
 #####
 #
@@ -87,6 +89,24 @@ ax2.text(0.025, 0.95, 'MACD (%d, %d, %d)' % (nfast, nslow, nema), va='top', tran
 
 #####
 #
+# DPO indicator
+#
+#####
+from techmodels.indicators.trend.price.dpo import DPOIndicator
+
+fillcolor = 'darkslategrey'
+n = 10  # Default 10
+
+dpo = DPOIndicator(prices, n)
+y1 = dpo.indicator()
+y2 = dpo.indicator_inverse()
+
+ax3.fill_between(t, y1, 0, where=y2 <= y1, alpha=0.5, facecolor='gray', edgecolor=fillcolor)
+ax3.fill_between(t, y1, 0, where=y2 >= y1, alpha=0.5, facecolor='black', edgecolor=fillcolor)
+ax3.text(0.025, 0.95, 'DPO (%d)' % (n), va='top', transform=ax3.transAxes, fontsize=textsize)
+
+#####
+#
 # Shading Region
 #
 #####
@@ -128,8 +148,8 @@ ax1.text(0.025, 0.95, '%s (%d, %d, %d)' % (label, nfast, nslow, nema),
 #
 #####
 # turn off upper axis tick labels, rotate the lower ones, etc
-for ax in ax1, ax1t, ax2:
-    if ax != ax2:
+for ax in ax1, ax1t, ax2, ax3:
+    if ax != ax3:
         for label in ax.get_xticklabels():
             label.set_visible(False)
     else:
