@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import zigzag
+from techmodels.overlays.trend.price.zigzag import ZigzagOverlay
 
 
 class TestMinChange(unittest.TestCase):
@@ -34,10 +34,9 @@ class TestMinChange(unittest.TestCase):
           If the tuple in question is expected in the output, the third item must be
           the string 'expected'.
         '''
-        actual = zigzag.min_change(data,
-                                   change=change,
-                                   type='absolute',
-                                   getter=getter)
+        instance = ZigzagOverlay(min_change=change, type='absolute', getter=getter)
+
+        actual = instance.min_change(data)
 
         # filter out the expected results
         expected = [item for item in data if item[-1] == 'expected']
@@ -203,9 +202,9 @@ class TestMinChange(unittest.TestCase):
           If the tuple in question is expected in the output, the third item
           must be the string 'expected'.
         '''
-        actual = zigzag.min_change(data,
-                                   change=change,
-                                   getter=getter)
+        instance = ZigzagOverlay(min_change=change, type='percent', getter=getter)
+
+        actual = instance.min_change(data)
 
         # filter out the expected results
         expected = [item for item in data if item[-1] == 'expected']

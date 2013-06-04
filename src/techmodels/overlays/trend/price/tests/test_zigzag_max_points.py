@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import zigzag
+from techmodels.overlays.trend.price.zigzag import ZigzagOverlay
 
 
 class TestMaxPoints(unittest.TestCase):
@@ -24,9 +24,9 @@ class TestMaxPoints(unittest.TestCase):
     '''
 
     def run_test(self, message, data, points=4, getter=lambda x: x[1]):
-        actual = zigzag.max_points(data,
-                                   points=points,
-                                   getter=getter)
+        instance = ZigzagOverlay(max_points=points, type='percent', getter=getter)
+
+        actual = instance.max_points(data)
 
         # filter out the expected results
         expected = [item for item in data if item[-1] == 'expected']
@@ -62,22 +62,22 @@ class TestMaxPoints(unittest.TestCase):
     def test_elliott_wave(self):
         up, down = 1, -1
 
-        def get_5(last, dir):
+        def get_5(last, direction):
             i, n = last[0:2]
             return [
-                (i + 1, n + dir * 3),
-                (i + 2, n + dir * 2),
-                (i + 3, n + dir * 6),
-                (i + 4, n + dir * 5),
-                (i + 5, n + dir * 8, 'expected'),
+                (i + 1, n + direction * 3),
+                (i + 2, n + direction * 2),
+                (i + 3, n + direction * 6),
+                (i + 4, n + direction * 5),
+                (i + 5, n + direction * 8, 'expected'),
             ]
 
-        def get_3(last, dir):
+        def get_3(last, direction):
             i, n = last[0:2]
             return [
-                (i + 1, n + dir * 2),
-                (i + 2, n + dir * 1),
-                (i + 3, n + dir * 3, 'expected'),
+                (i + 1, n + direction * 2),
+                (i + 2, n + direction * 1),
+                (i + 3, n + direction * 3, 'expected'),
             ]
 
         elliott = [(1, 100)]
