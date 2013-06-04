@@ -4,7 +4,7 @@ Sequential Price-Trend Models: MACD with Price-Bar-Chunk (MDC)
 import numpy
 import json
 
-from techmodels.overlays.trend.price.chunk import sign_chunker
+from techmodels.overlays.trend.price.chunk import ChunkOverlay
 from techmodels.indicators.trend.price.macd import MACDIndicator
 
 
@@ -16,7 +16,8 @@ def macd_chunk(data, nfast=10, nslow=35, nema=5, getter=lambda x: x):
     cropped_indicator = macd_oscillator.indicator(prices)[nfast + 1:]
     cropped_data = data[nfast + 1:]
 
-    chunks = sign_chunker(cropped_indicator, cropped_data)
+    chunker = ChunkOverlay()
+    chunks = chunker.sign(cropped_indicator, cropped_data)
     return chunks
 
 

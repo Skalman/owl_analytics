@@ -4,14 +4,15 @@ Sequential Price-Trend Models: DPO with Price-Bar-Chunk (DPC)
 import numpy
 import json
 
-from techmodels.overlays.trend.price.chunk import sign_chunker
+from techmodels.overlays.trend.price.chunk import ChunkOverlay
 from techmodels.indicators.trend.price.dpo import DPOIndicator
 
 
 def dpo_chunk(data, n=10, getter=lambda x: x):
     prices = numpy.array(map(getter, data))
     dpo = DPOIndicator(n)
-    chunks = sign_chunker(dpo.indicator(prices), data)
+    chunker = ChunkOverlay()
+    chunks = chunker.sign(dpo.indicator(prices), data)
     return chunks
 
 
