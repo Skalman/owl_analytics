@@ -10,8 +10,8 @@ from techmodels.indicators.trend.price.dpo import DPOIndicator
 
 def dpo_chunk(data, n=10, getter=lambda x: x):
     prices = numpy.array(map(getter, data))
-    dpo = DPOIndicator(prices, n)
-    chunks = sign_chunker(dpo.indicator(), data)
+    dpo = DPOIndicator(n)
+    chunks = sign_chunker(dpo.indicator(prices), data)
     return chunks
 
 

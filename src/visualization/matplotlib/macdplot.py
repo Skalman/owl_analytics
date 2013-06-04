@@ -78,9 +78,9 @@ from techmodels.indicators.trend.price.macd import MACDIndicator
 fillcolor = 'darkslategrey'
 nslow, nfast, nema = 35, 10, 5
 
-macd_oscillator = MACDIndicator(prices, nslow=35, nfast=10, nema=5)
-y1 = macd_oscillator.indicator()
-y2 = macd_oscillator.indicator_inverse()
+macd_oscillator = MACDIndicator(nslow=35, nfast=10, nema=5)
+y1 = macd_oscillator.indicator(prices)
+y2 = macd_oscillator.indicator_inverse(prices)
 
 ax2.fill_between(t, y1, 0, where=y2 <= y1, alpha=0.5, facecolor='green', edgecolor=fillcolor)
 ax2.fill_between(t, y1, 0, where=y2 >= y1, alpha=0.5, facecolor='red', edgecolor=fillcolor)
@@ -97,9 +97,9 @@ from techmodels.indicators.trend.price.dpo import DPOIndicator
 fillcolor = 'darkslategrey'
 n = 10  # Default 10
 
-dpo = DPOIndicator(prices, n)
-y1 = dpo.indicator()
-y2 = dpo.indicator_inverse()
+dpo = DPOIndicator(n)
+y1 = dpo.indicator(prices)
+y2 = dpo.indicator_inverse(prices)
 
 ax3.fill_between(t, y1, 0, where=y2 <= y1, alpha=0.5, facecolor='gray', edgecolor=fillcolor)
 ax3.fill_between(t, y1, 0, where=y2 >= y1, alpha=0.5, facecolor='black', edgecolor=fillcolor)
@@ -113,6 +113,8 @@ ax3.text(0.025, 0.95, 'DPO (%d)' % (n), va='top', transform=ax3.transAxes, fonts
 from visualization.matplotlib.utils.transform.regionshadingoverlay.regiontoshade import TranformRegionToShade
 
 legend = ''
+
+
 def shaderegion(chunkdata,
                 color_p='green', color_n='red', color_alpha=0.1,
                 legend=''):

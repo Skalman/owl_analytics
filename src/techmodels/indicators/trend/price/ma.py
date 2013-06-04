@@ -12,26 +12,24 @@ class MAIndicator(object):
     Indicator: -None-
     '''
 
-    def __init__(self, data, n, t='simple'):
+    def __init__(self, n, t='simple'):
         '''
         Constructor
         data = close prices
         n = number of periods
         t(type) = 'simple' | 'exponential'
         '''
-        self.data = data
         self.n = n
         self.t = t
-        self.ma = self.__calculate_ma()
 
-    def __calculate_ma(self):
-        self.data = numpy.asarray(self.data)
+    def ma(self, data):
+        data = numpy.asarray(data)
         if self.t == 'simple':
             weights = numpy.ones(self.n)
         else:
             weights = numpy.exp(numpy.linspace(-1., 0., self.n))
 
         weights /= weights.sum()
-        a = numpy.convolve(self.data, weights, mode='full')[:len(self.data)]
+        a = numpy.convolve(data, weights, mode='full')[:len(data)]
         a[:self.n] = a[self.n]
         return a

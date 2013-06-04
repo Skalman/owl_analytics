@@ -12,7 +12,7 @@ class MACDIndicator(object):
     Indicator: (MACD - Signal)
     '''
 
-    def __init__(self, data, nfast=10, nslow=35, nema=5):
+    def __init__(self, nfast=10, nslow=35, nema=5):
         '''
         Constructor
         data = close prices
@@ -20,27 +20,25 @@ class MACDIndicator(object):
         nslow = number of periods for longer moving average(exponential)
         nema = number of periods for just an exponential moving average
         '''
-        self.data = data
         self.nfast = nfast
         self.nslow = nslow
         self.nema = nema
         self.matype = 'exponential'
-        self.macd = self.__calculate_macd()
 
-    def __calculate_macd(self):
-        return self.emafast() - self.emaslow()
+    def macd(self, data):
+        return self.emafast(data) - self.emaslow(data)
 
-    def emaslow(self):
-        return MAIndicator(self.data, self.nslow, self.matype).ma
+    def emaslow(self, data):
+        return MAIndicator(self.nslow, self.matype).ma(data)
 
-    def emafast(self):
-        return MAIndicator(self.data, self.nfast, self.matype).ma
+    def emafast(self, data):
+        return MAIndicator(self.nfast, self.matype).ma(data)
 
-    def signal(self):
-        return MAIndicator(self.macd, self.nema, self.matype).ma
+    def signal(self, data):
+        return MAIndicator(self.nema, self.matype).ma(self.macd(data))
 
-    def indicator(self):
-        return self.macd - self.signal()
+    def indicator(self, data):
+        return self.macd(data) - self.signal(data)
 
-    def indicator_inverse(self):
-        return self.signal() - self.macd
+    def indicator_inverse(self, data):
+        return self.signal(data) - self.macd(data)

@@ -13,30 +13,29 @@ class DPOIndicator(object):
     Indicator: (Price - SMA)
     '''
 
-    def __init__(self, data, n=10):
+    def __init__(self, n=10):
         '''
         Constructor
         data = close prices
         n = number of periods
         '''
-        self.data = data
         self.n = n
-        self.shifted_period = (n / 2 + 1)
+        self.shifted_period = (n / 2 + 1)  # TODO think about Python 3!!!
 
-    def indicator(self):
-        dpo = self.__shiftdata() - self.sma()[self.shifted_period:]
+    def indicator(self, data):
+        dpo = self.__shiftdata(data) - self.sma(data)[self.shifted_period:]
         return dpo
 
-    def indicator_inverse(self):
-        dpo = self.sma()[self.shifted_period:] - self.__shiftdata()
+    def indicator_inverse(self, data):
+        dpo = self.sma(data)[self.shifted_period:] - self.__shiftdata(data)
         return dpo
 
-    def sma(self):
-        sma = MAIndicator(self.data, self.n, t='simple').ma
+    def sma(self, data):
+        sma = MAIndicator(self.n, t='simple').ma(data)
         return self.__fill_nan(sma)
 
-    def __shiftdata(self):
-        shifteddata = self.__fill_nan(self.data[self.shifted_period:])
+    def __shiftdata(self, data):
+        shifteddata = self.__fill_nan(data[self.shifted_period:])
         return shifteddata
 
     def __fill_nan(self, arr):

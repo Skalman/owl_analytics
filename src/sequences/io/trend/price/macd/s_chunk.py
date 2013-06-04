@@ -10,10 +10,10 @@ from techmodels.indicators.trend.price.macd import MACDIndicator
 
 def macd_chunk(data, nfast=10, nslow=35, nema=5, getter=lambda x: x):
     prices = numpy.array(map(getter, data))
-    macd_oscillator = MACDIndicator(prices, nfast, nslow, nema)
+    macd_oscillator = MACDIndicator(nfast, nslow, nema)
 
     # Skip the first nfast values
-    cropped_indicator = macd_oscillator.indicator()[nfast + 1:]
+    cropped_indicator = macd_oscillator.indicator(prices)[nfast + 1:]
     cropped_data = data[nfast + 1:]
 
     chunks = sign_chunker(cropped_indicator, cropped_data)
