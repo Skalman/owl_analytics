@@ -171,7 +171,6 @@ var Sequence = (function (undefined) {
 				if (branch === undefined) {
 					branch = graph.num_branches++;
 					graph.matrix[branch] = [];
-					// console.log( 'create new branch "%d" for %s', branch, block_id );
 				}
 
 				graph.matrix[branch][time] = block_id;
