@@ -1,4 +1,5 @@
-var Sequence = (function ($) {
+var Sequence = (function (undefined) {
+	'use strict';
 
 	function Sequence(options) {
 		// blocks[block_id] = block
@@ -120,25 +121,33 @@ var Sequence = (function ($) {
 
 			function get_block_info(self) {
 				var i;
-				var inputs = {};
+				var info = {};
 
 				for (i in self.blocks) {
-					inputs[self.blocks[i].id] = { inputs_left: 0, suggested_next: null };
+					info[self.blocks[i].id] = {
+						inputs_left: 0,
+
+						// `time` and `branches` will be refined until one combination is
+						// finally chosen.
+						time: 0,
+						branches: []
+					};
 				}
 
 				for (i in self.edges) {
-					inputs[self.edges[i].to].inputs_left++;
+					info[self.edges[i].to].inputs_left++;
 				}
 
-				return inputs;
+				return info;
 			}
 
 			function add_block(block_id, branch, time) {
 				var info = block_info[block_id];
 				info.inputs_left--;
+				info.branches.push(branch);
 
-				if (!info.suggested_next || info.suggested_next.time < time) {
-					info.suggested_next = { branch: branch, time: time };
+				if (info.time < time) {
+					info.time = time;
 				}
 
 				// Are there any more inputs to wait for?
@@ -147,11 +156,19 @@ var Sequence = (function ($) {
 				}
 
 				// add this block to the graph now
-				branch = info.suggested_next.branch;
-				time = info.suggested_next.time;
+				var i;
+				var branches = info.branches;
+				time = info.time;
 
-				// Switch branch if the current position is occupied
-				if (graph.matrix[branch][time]) {
+				// Go through the suggested branches to find an unused at the current time
+				branch = undefined;
+				for (i = 0; i < branches.length; i++) {
+					if (!graph.matrix[branches[i]][time]) {
+						branch = branches[i];
+						break;
+					}
+				}
+				if (branch === undefined) {
 					branch = graph.num_branches++;
 					graph.matrix[branch] = [];
 					// console.log( 'create new branch "%d" for %s', branch, block_id );
@@ -159,7 +176,6 @@ var Sequence = (function ($) {
 
 				graph.matrix[branch][time] = block_id;
 				
-				var i;
 				var outputs = self.get_edges(block_id).outputs;
 
 				for (i = 0; i < outputs.length; i++) {
@@ -187,8 +203,5 @@ var Sequence = (function ($) {
 		}
 	};
 
-	function sort_blocks(self) {
-	}
-
 	return Sequence;
-}(jQuery));
+}());

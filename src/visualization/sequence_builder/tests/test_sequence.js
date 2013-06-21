@@ -67,24 +67,24 @@ test('sequence.get_sources', 1, function () {
 test('sequence.sort_blocks', 1, function () {
 	var seq = new Sequence(data);
 
-	// time\branch  0 1 2 3
+	// time\branch  0 1 2
 	//
 	// 0.           a b
-	//              |\ \
-	// 1.           c `-d
-	//               \  |\
-	// 2.             \ e f
-	//                 \|
-	// 3.               g
+	//              |\|
+	// 1.           c d
+	//              | |\
+	// 2.           | e f
+	//              |/
+	// 3.           g
 
 	deepEqual(seq.sort_blocks(), {
 		a: { time: 0, branch: 0 },
 		b: { time: 0, branch: 1 },
 		c: { time: 1, branch: 0 },
-		d: { time: 1, branch: 2 },
-		e: { time: 2, branch: 2 },
-		f: { time: 2, branch: 3 },
-		g: { time: 3, branch: 2 }
+		d: { time: 1, branch: 1 },
+		e: { time: 2, branch: 1 },
+		f: { time: 2, branch: 2 },
+		g: { time: 3, branch: 0 }
 	}, 'Sort blocks');
 
 });
