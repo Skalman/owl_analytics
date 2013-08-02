@@ -1,0 +1,261 @@
+/****    CSS from jsPlumb demo-all.css    *****/
+
+
+body {
+    padding:0;
+    margin:0;
+    background-color:white;    
+    font-family:'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;    
+}
+
+#explanation {
+    text-align: center;
+}
+
+#headerWrapper {
+    width:100%;
+    background-color:black;
+    position:fixed;
+    top:0;left:0;
+    z-index:10000;
+    height:44px;
+    padding:0;
+    border-bottom:1px solid #999;
+    box-shadow: 0px 2px 19px #aaa;
+   -o-box-shadow: 0px 2px 19px #aaa;
+   -webkit-box-shadow: 0px 2px 19px #aaa;
+   -moz-box-shadow: 0px 2px 19px #aaa;
+   
+   opacity:0.8;
+}
+
+#header {
+    margin-top:0;
+    height:44px;
+    font-size:13px;
+    margin-left:auto;
+    margin-right:auto;    
+    width:950px;
+}
+
+#intro {
+    margin-top:59px;
+}
+
+#main {
+    /* these two margins settings are here just to ensure that jsPlumb handles
+    margins properly.*/  
+    margin-top:44px;
+    margin-left: auto;
+    position: relative;
+    font-size: 80%;
+    margin-right: auto;
+    width: 850px;
+    border-left: 2px solid #456;
+    border-right: 2px solid #456;
+    border-bottom: 2px solid #456;
+    height: 600px;
+    overflow: hidden;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color:#eaedef;
+}
+
+#sidebar {            
+    margin-left:auto;
+    margin-right:auto;
+    width:800px;        
+    font-size:13px;    
+}
+
+
+/* demo elements */
+
+.menu,#render, #explanation { 
+    
+    background-color:#fff;      
+}
+
+.menu {    
+    height: 15px;
+    float:right;
+    padding-top:1em;
+    padding-bottom:0.4em;   
+    background-color: transparent;
+    margin-right:30px;
+}
+
+#render {
+    padding-top:2px;
+    margin-left:auto;
+    margin-right:auto;
+    z-index:5000;
+    margin-top:0px;  
+    text-align: center;
+    background-color:white;
+}
+
+#render ul {
+    padding-left:1em;
+}
+#render ul li {
+    list-style-type:none;
+}
+#render h5 {
+    display:inline;
+}
+
+.otherLibraries {
+    display:inline;
+}
+
+a, a:visited {
+    text-decoration:none;
+    color:#01a3c6;    
+    font-family:helvetica;
+    padding:0.3em;
+    border-radius:0.2em;
+}
+
+a:hover {
+    color:#1b911b;
+}
+
+.selected {
+    color:rgb(189,11,11) !important;
+}
+
+.window, .label { 
+    background-color:white;
+    text-align:center;
+    z-index:24;
+    cursor:pointer;
+    box-shadow: 2px 2px 19px #aaa;
+   -o-box-shadow: 2px 2px 19px #aaa;
+   -webkit-box-shadow: 2px 2px 19px #aaa;
+   -moz-box-shadow: 2px 2px 19px #aaa;
+    
+}
+path, ._jsPlumb_endpoint { cursor:pointer; }
+
+/* z index stuff. windows are at z-index 24. */
+
+._jsPlumb_connector { z-index:18; }
+._jsPlumb_endpoint { z-index:19; }
+._jsPlumb_overlay { z-index:20; }
+
+._jsPlumb_connector._jsPlumb_hover {
+    z-index:21 !important;
+}
+
+._jsPlumb_endpoint._jsPlumb_hover {
+    z-index:22 !important;
+}
+
+._jsPlumb_overlay._jsPlumb_hover {
+    z-index:23 !important;
+}
+
+/* for debugging */
+.foo {
+    border:2px solid red;
+}
+
+/* A TEST 
+._jsPlumb_element_dragging path {    
+    z-index:21 !important;
+    stroke:green;
+}
+
+._jsPlumb_endpoint._jsPlumb_element_dragging * {
+    fill:green;
+}
+
+*/
+
+/* ANOTHER TEST 
+._jsPlumb_endpoint_anchor_foo * {
+    fill:black;
+}
+
+._jsPlumb_endpoint_anchor_bar * {
+    fill:red;
+}
+*/
+
+
+/****    CSS from jsPlumb stateMachineDemo.css    *****/
+#demo {
+    margin-top:5em;
+}
+
+.w {
+    font-size:0.8em;
+    width:8em;
+    padding:0.5em;
+    position:absolute;
+    border: 1px solid black;
+    z-index:4;
+    border-radius:1em;
+    border:1px solid #346789;
+    box-shadow: 2px 2px 19px #e0e0e0;
+    -o-box-shadow: 2px 2px 19px #e0e0e0;
+    -webkit-box-shadow: 2px 2px 19px #e0e0e0;
+    -moz-box-shadow: 2px 2px 19px #e0e0e0;
+    -moz-border-radius:0.5em;
+    border-radius:0.5em;
+    opacity:0.8;
+    filter:alpha(opacity=80);
+    cursor:move;
+    -webkit-transition:0.2s;
+    transition:0.2s;
+}
+
+    .w.ui-draggable-dragging {
+        -webkit-transition:0s;
+        transition:0s;
+    }
+
+.aLabel {
+    background-color:white;
+    opacity:0.8;
+    padding:0.3em;              
+}
+
+.ep {
+    float:right;
+    width:1em;
+    height:1em;
+    background-color:#994466;
+    cursor:pointer;
+}
+
+._jsPlumb_endpoint {
+    z-index:3;
+}
+
+#opened {
+    left:10em;
+    top:5em;
+}
+
+#phone1 {
+    left:35em;
+    top:12em;
+    width:7em;
+}
+#inperson {
+    left:12em;
+    top:23em;
+}
+#phone2 {
+    left:28em;
+    top:24em;
+}
+#rejected {
+    left:10em;
+    top:35em;
+}
+.dragHover { border:1px dotted red; }
+
+path { cursor:pointer; }
