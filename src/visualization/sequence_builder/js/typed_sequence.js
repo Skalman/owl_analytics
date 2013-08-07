@@ -3,7 +3,10 @@ var Typed_sequence = (function (_super_class, Error) {
 
 	var _super = _super_class.prototype;
 
+	var object_toString = {}.toString;
+
 	function Typed_sequence(options) {
+		// TODO - the following line probably not necessary
 		this.types = {};
 
 		_super_class.call(this, options);
@@ -37,13 +40,52 @@ var Typed_sequence = (function (_super_class, Error) {
 		},
 
 		set_types: function (types) {
-			console.log( 'types', types );
-			var i;
-			this.types = {};
-			for (i = 0; i < types.length; i++) {
-				this.types[types[i].type] = types[i];
+			// Target structure:
+			// 
+			// this.types[type_id] = {
+			//   input[port_id] = port_type
+			//   output[port_id] = port_type
+			//   parameters[parameter_name] = {
+			//     type = type
+			//     default = default|undefined
+			//     required = true|false
+			//   }
+			// }
+			this.types = transform_types(types);
+
+			function transform_types(types) {
+				var i;
+				var res = {};
+
+				for (i = 0; i < types.length; i++) {
+					res[types[i].type] = transform_type(types[i]);
+				}
+				return res;
 			}
-			console.log( 'this.types', this.types );
+
+			function transform_type(type) {
+				var i;
+				var res = {
+					input: {},
+					output: {},
+					parameters: {}
+				};
+
+				for (i = 0; i < type.input.length; i++) {
+					res.input[type.input[i].port] = type.input[i].type;
+				}
+				for (i = 0; i < type.output.length; i++) {
+					res.output[type.output[i].port] = type.output[i].type;
+				}
+				for (i = 0; i < type.parameters.length; i++) {
+					res.parameters[type.parameters[i].name] = {
+						type: type.parameters[i].type,
+						'default': type.parameters[i]['default'],
+						required: !!type.parameters[i].required
+					};
+				}
+				return res;
+			}
 		},
 
 		assert_valid_block: function (block) {
@@ -76,19 +118,6 @@ var Typed_sequence = (function (_super_class, Error) {
 			} catch (e) {
 				return false;
 			}
-
-
-			// TODO
-			block = {
-				"id": "g-abc",
-				"type": "google",
-				
-				"symbol": "ABC",
-				"exchange": "NYSE",
-				"minutes": 1,
-				"days": 1
-			}
-			return true;
 		},
 
 		set_block: function (block) {
@@ -96,30 +125,73 @@ var Typed_sequence = (function (_super_class, Error) {
 			_super.set_block.call(this, block);
 		},
 
-		is_valid_edge: function (edge) {
-			// TODO
-			edge = {
-				"id": "edge-1",
-				"from": "g-abc",
-				
-				"to": "my-combiner",
-				"input_type": "default",
+		assert_valid_edge: function (edge) {
+			if (!edge.from) {
+				console.log( edge );
+				throw new Error("Expected source block 'from'");
+			} else if (!edge.to) {
+				throw new Error("Expected destination block 'to'");
+
+			} else if (typeof edge.from !== 'object') {
+				throw new Error("Expected source block 'from' as an object {block:<val>, port:<val>}, a " + (typeof edge.from) + " '" + edge.from + "' given");
+			} else if (typeof edge.to !== 'object') {
+				throw new Error("Expected source block 'to' as an object {block:<val>, port:<val>}, a " + (typeof edge.to) + " '" + edge.to + "' given");
+
+			} else if (edge.from.port == null) {
+				throw new Error("Expected source block port 'from.port'");
+			} else if (edge.to.port == null) {
+				throw new Error("Expected destination block port 'to.port'");
+			
+			} else if (!this.blocks[edge.from.block]) {
+				throw new Error("Source block '" + edge.from.block + "' does not exist");
+			} else if (!this.blocks[edge.to.block]) {
+				throw new Error("Destination block '" + edge.to.block + "' does not exist");
+			}
+
+			var from_block = this.blocks[edge.from.block];
+			var to_block = this.blocks[edge.to.block];
+
+			var from_block_type = this.types[from_block.type];
+			var to_block_type = this.types[to_block.type];
+
+			var from_port_type = from_block_type.output[edge.from.port];
+			var to_port_type = to_block_type.input[edge.to.port];
+
+			if (from_port_type == null) {
+				throw new Error("Source block '" + edge.from.block + "' of type '" + from_block.type + "' does not have an output port '" + edge.from.port + "'");
+			} else if (to_port_type == null) {
+				throw new Error("Destination block '" + edge.to.block + "' of type '" + to_block.type + "' does not have an input port '" + edge.to.port + "'");
+			} else if (from_port_type !== to_port_type) {
+				throw new Error("Port mismatch: output port is of type '" + from_port_type + "', while the input port is of type '" + to_port_type + "'");
 			}
 
 			return true;
 		},
 
-		set_edge: function (edge) {
-			if (this.is_valid_edge(edge)) {
-				_super.set_edge.call(this, edge);
-			} else {
-				throw new Error('Edge input and output type error: missing, do not match the block types, or do not match each other');
+		is_valid_edge: function (edge) {
+			try {
+				this.assert_valid_block(block);
+				return true;
+			} catch (e) {
+				return false;
 			}
+		},
+
+		set_edge: function (edge) {
+			this.assert_valid_edge(edge);
+			if (edge.from.toString === object_toString) {
+				edge.from.toString = return_block_as_string;
+			}
+			if (edge.to.toString === object_toString) {
+				edge.to.toString = return_block_as_string;
+			}
+			_super.set_edge.call(this, edge);
 		}
 	});
 
-
-
+	function return_block_as_string() {
+		return this.block + '';
+	}
 
 	function extend(obj, source) {
 		for (var prop in source) {

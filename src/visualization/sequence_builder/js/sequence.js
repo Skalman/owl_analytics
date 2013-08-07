@@ -66,9 +66,9 @@ var Sequence = (function (undefined) {
 			for (i in this.edges) {
 				edge = this.edges[i];
 
-				if (edge.from === block_id) {
+				if (edge.from + '' === block_id) {
 					outputs.push(edge);
-				} else if (edge.to === block_id) {
+				} else if (edge.to + '' === block_id) {
 					inputs.push(edge);
 				}
 			}
@@ -178,7 +178,7 @@ var Sequence = (function (undefined) {
 				var outputs = self.get_edges(block_id).outputs;
 
 				for (i = 0; i < outputs.length; i++) {
-					add_block(outputs[i].to, branch, time + 1);
+					add_block(outputs[i].to + '', branch, time + 1);
 				}
 			}
 

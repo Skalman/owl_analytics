@@ -20,10 +20,6 @@ var conf = {
 			"tick": '1m',
 			"time_period": '1d'
 		},
-		// {
-		// 	"id": "my-combiner",
-		// 	"type": "combiner",
-		// },
 		{
 			"id": "my-macd",
 			"type": "macd",
@@ -36,42 +32,31 @@ var conf = {
 			"id": "my-chunker",
 			"type": "sign-chunker",
 		},
-		// {
-		// 	"id": "my-output-1",
-		// 	"type": "output"
-		// },
 	],
 	"edges": [
-		// {
-		// 	"id": "edge-1",
-		// 	"from": "g-abc",
-			
-		// 	"to": "my-combiner",
-		// 	"input_type": "default",
-		// },
-		// {
-		// 	"id": "edge-2",
-		// 	"from": "y-def",
-			
-		// 	"to": "my-combiner",
-		// 	"input_type": "default",
-		// },
 		{
 			"id": "edge-3",
-			"from": "g-abc",
-			
-			"to": "my-macd",
+
+			"from": {
+				"block": "g-abc",
+				"port": "market_data",
+			},
+			"to": {
+				"block": "my-macd",
+				"port": "market_data"
+			}
 		},
 		{
 			"id": "edge-4",
-			"from": "my-macd",
-			"to": "my-chunker",
+			"from": {
+				"block": "my-macd",
+				"port": "indicator",
+			},
+			"to": {
+				"block": "my-chunker",
+				"port": "data"
+			}
 		},
-		// {
-		// 	"id": "edge-5",
-		// 	"from": "my-chunker",
-		// 	"to": "my-output-1",
-		// }
 	],
 	"types": [
 		{
@@ -80,10 +65,11 @@ var conf = {
 			"input": [],
 			"output": [
 				{
+					"port": "market_data",
 					"type": "ohlcvt"
 				}
 			],
-
+		
 			"parameters": [
 				{
 					"name": "symbol",
@@ -116,6 +102,7 @@ var conf = {
 			"input": [],
 			"output": [
 				{
+					"port": "market_data",
 					"type": "ohlcvt"
 				}
 			],
@@ -151,33 +138,49 @@ var conf = {
 
 			"input": [
 				{
+					"port": "market_data",
 					"type": "ohlcvt"
 				}
 			],
 
 			"output": [
 				{
+					"port": "macd",
+					"type": "moving-average"
+				},
+				{
+					"port": "signal",
+					"type": "moving-average"
+				},
+				{
+					"port": "indicator",
+					"type": "zeroline-oscillator"
+				},
+				{
+					"port": "indicator_inverse",
 					"type": "zeroline-oscillator"
 				}
 			],
 
 			"parameters": [
 				{
+					"name": "price",
+					"type": ["open", "high", "low", "close"],
+					"default": "close"
+				},
+				{
 					"name": "fast",
 					"type": "number",
-					"required": false,
 					"default": 35
 				},
 				{
 					"name": "slow",
 					"type": "number",
-					"required": false,
 					"default": 5
 				},
 				{
 					"name": "nema",
 					"type": "number",
-					"required": false,
 					"default": 10
 				}
 			]
@@ -188,12 +191,14 @@ var conf = {
 
 			"input": [
 				{
+					"port": "data",
 					"type": "zeroline-oscillator"
 				}
 			],
 
 			"output": [
 				{
+					"port": "chunks",
 					"type": "zeroline-oscillator-chunks"
 				}
 			],

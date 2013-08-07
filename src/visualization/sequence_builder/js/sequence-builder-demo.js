@@ -16,6 +16,7 @@
 		init :function() {
 
 			var seq = new Typed_sequence(conf);
+			// var seq = new Sequence(conf);
 			window.seq = seq;
 			window.do_layout = do_layout;
 
@@ -82,12 +83,20 @@
 			// this listener changes the paint style to some random new color and also sets the connection's internal
 			// id as the label overlay's text.
 			jsPlumb.bind("connection", function(info) {
-				seq.set_edge({
-					id: info.connection.id,
-					from: info.sourceId,
-					to: info.targetId
-				});
-				do_layout();
+				try {
+					console.log( info );
+					seq.set_edge({
+						id: info.connection.id,
+						from: info.connection.getParameter('from'),
+						to: info.connection.getParameter('to')
+					});
+					do_layout();
+				} catch (e) {
+					console.log( 'could not set edge (msg: %s) - removing again', e.message, e.stack );
+					if (!jsPlumb.detach(info.connection)) {
+						console.error('failed to remove connection!!!');
+					}
+				}
 			});
 
 			// initialise all '.w' elements as connection targets.
@@ -100,23 +109,33 @@
 			var edges = seq.edges;
 			seq.edges = {};
 			$.each(edges, function (id, edge) {
+				console.log( 'connect ', edge.from.block, '->', edge.to.block );
 				var connection = jsPlumb.connect({
-					source:edge.from,
-					target:edge.to
+					source: edge.from.block,
+					target: edge.to.block,
+					parameters: {
+						from: edge.from,
+						to: edge.to
+					}
 				});
-				edge.id = connection.id;
-				seq.set_edge(edge);
+				// jsPlumb.connect(connection);
+				// edge.id = connection.id;
+				// seq.set_edge(edge);
 			});
 
 			function do_layout() {
-				var layout = seq.sort_blocks();
+				try {
+					var layout = seq.sort_blocks();
+					$.each(layout, function (id, block_pos) {
+						$('#'+id).css({
+							top: (5+6*block_pos.branch) + 'em',
+							left: (15*block_pos.time) + 'em'
+						})
+					});
+				} catch (e) {
+					console.error( 'tried and failed to sort blocks', e.stack );
+				}
 
-				$.each(layout, function (id, block_pos) {
-					$('#'+id).css({
-						top: (5+6*block_pos.branch) + 'em',
-						left: (15*block_pos.time) + 'em'
-					})
-				});
 				setTimeout(jsPlumb.repaintEverything, 40);
 				setTimeout(jsPlumb.repaintEverything, 80);
 				setTimeout(jsPlumb.repaintEverything, 120);
