@@ -125,6 +125,26 @@ var Typed_sequence = (function (_super_class, Error) {
 			_super.set_block.call(this, block);
 		},
 
+		suggest_ports: function (from_id, to_id) {
+			var from_type = this.blocks[from_id].type;
+			var to_type = this.blocks[to_id].type;
+			var output = this.types[from_type].output;
+			var input = this.types[to_type].input;
+			var i, j;
+			var suggestions = [];
+			for (i in output) {
+				for (j in input) {
+					if (output[i] === input[j]) {
+						suggestions.push({
+							output: i,
+							input: j
+						});
+					}
+				}
+			}
+			return suggestions;
+		},
+
 		assert_valid_edge: function (edge) {
 			if (!edge.from) {
 				console.log( edge );

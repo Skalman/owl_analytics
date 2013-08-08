@@ -83,19 +83,40 @@
 			// this listener changes the paint style to some random new color and also sets the connection's internal
 			// id as the label overlay's text.
 			jsPlumb.bind("connection", function(info) {
+				var conn = info.connection;
 				try {
-					console.log( info );
+					var from = conn.getParameter('from') || conn.sourceId;
+					var to = conn.getParameter('to') || conn.targetId;
+					if (typeof from === 'string' || typeof to === 'string') {
+						var suggestions = seq.suggest_ports(from, to);
+						if (suggestions.length === 0) {
+							throw new Error("Cannot connect block '" + from + "' to '" + to + "' - no matching ports");
+						} else if (suggestions.length === 1) {
+							from = {
+								block: from,
+								port: suggestions[0].output
+							};
+							to = {
+								block: to,
+								port: suggestions[0].input
+							};
+						} else {
+							throw new Error("Connecting block '" + from + "' to '" + to + "' is possible with multiple ports\n" +
+								"[not supported yet - TODO]");
+						}
+					}
 					seq.set_edge({
 						id: info.connection.id,
-						from: info.connection.getParameter('from'),
-						to: info.connection.getParameter('to')
+						from: from,
+						to: to
 					});
 					do_layout();
 				} catch (e) {
-					console.log( 'could not set edge (msg: %s) - removing again', e.message, e.stack );
-					if (!jsPlumb.detach(info.connection)) {
-						console.error('failed to remove connection!!!');
-					}
+					alert(e.message);
+					console.log( 'Could not add edge - remove it', e.message );
+					
+					// in future versions of jsPlumb, this will return whether it succeeded or not
+					jsPlumb.detach(info.connection);
 				}
 			});
 
@@ -109,7 +130,7 @@
 			var edges = seq.edges;
 			seq.edges = {};
 			$.each(edges, function (id, edge) {
-				console.log( 'connect ', edge.from.block, '->', edge.to.block );
+				console.log( 'connect %s -> %s', edge.from.block, edge.to.block );
 				var connection = jsPlumb.connect({
 					source: edge.from.block,
 					target: edge.to.block,
@@ -133,7 +154,7 @@
 						})
 					});
 				} catch (e) {
-					console.error( 'tried and failed to sort blocks', e.stack );
+					console.error( 'tried and failed to sort blocks', e.stack.replace(/file:[a-z_\/]+\//g, '') );
 				}
 
 				setTimeout(jsPlumb.repaintEverything, 40);
